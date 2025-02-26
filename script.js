@@ -1,19 +1,24 @@
-async function fetchTechNews() {
+async function fetchHackerNewsStory() {
     try {
-        const response = await fetch("https://newsapi.org/v2/top-headlines?category=technology&apiKey=69f1e61c22334859b5722d88d071c7e3");
-        const data = await response.json();
+        const topStoriesResponse = await fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
+        const topStories = await topStoriesResponse.json();
 
-        if (data.articles && data.articles.length > 0) {
-            const article = data.articles[Math.floor(Math.random() * data.articles.length)];
-            document.getElementById("random-news").innerHTML = 
-                `📰 <b>[Latest]</b> <a href="${article.url}" target="_blank">${article.title}</a>`;
-        } else {
-            document.getElementById("random-news").innerText = "No news available.";
+        if (!topStories || topStories.length === 0) {
+            document.getElementById("hacker-news").innerText = "No news available.";
+            return;
         }
+
+        const storyId = topStories[0];
+        const storyResponse = await fetch(`https://hacker-news.firebaseio.com/v0/item/${storyId}.json`);
+        const storyData = await storyResponse.json();
+
+        document.getElementById("hacker-news").innerHTML = 
+            `<b>${storyData.title}</b> (<a href="${storyData.url}" target="_blank">Read more</a>)`;
+        
     } catch (error) {
-        console.error("Error fetching news:", error);
-        document.getElementById("random-news").innerText = "Failed to load news.";
+        console.error("Error fetching Hacker News:", error);
+        document.getElementById("hacker-news").innerText = "Failed to load news.";
     }
 }
 
-document.addEventListener("DOMContentLoaded", fetchTechNews);
+document.addEventListener("DOMContentLoaded", fetchHackerNewsStory);
